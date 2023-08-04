@@ -1,0 +1,201 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<style>
+		@font-face {
+			font-family: 'blogger-sans';
+			src: url('https://cdn.octothorp.team/gmod/resource/fonts/bloggerm.ttf') format('truetype');
+		}
+
+		html {
+			height: 100%;
+		}
+
+		body {
+			padding: 0;
+			margin: 0;
+			height: 100%;
+
+			background-color: #444444;
+			background-image: url();
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+
+		#main-text {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			color: #3B2F3B;
+			background-image: url(loadingscreen_text.png);
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+
+		#loading {
+			position: absolute;
+			top: 50%;
+			margin: -200px 8.5%;
+			height: 400px;
+			width: 83%;
+			border-bottom: dashed 2px rgba(0,0,0, 0.35);
+			/* border-radius: 8px; */
+			/* background-color: #3B2F3B; */
+		}
+
+		#car {
+			width: 64px;
+			height: 64px;
+			position: absolute;
+			left: 1%;
+			bottom: 0;
+		}
+
+		#city {
+			width: 96px;
+			height: 96px;
+			position: absolute;
+			right: 1%;
+			bottom: 0;
+		}
+
+		#hint {
+			/* position: absolute; */
+			/* bottom: 20px; */
+			/* left: 30px; */
+			margin: auto;
+			padding-top: 25px;
+			text-align: center;
+			color: #EEEEEE;
+			font-family: blogger-sans;
+			font-size: 18pt;
+			max-width: 800px;
+
+			transition: opacity 0.5s;
+			opacity: 1;
+		}
+
+		#hint2 {
+			position: fixed;
+			bottom: 20px;
+			left: 30px;
+			color: #EEEEEE;
+			font-family: blogger-sans;
+			font-size: 18pt;
+			margin: 0;
+
+			animation-name: softblink;
+			animation-duration: 3s;
+			animation-iteration-count: infinite;
+		}
+
+		@keyframes softblink {
+			0% { opacity: 1 }
+			50% { opacity: 0.35 }
+			90% { opacity: 1 }
+		}
+
+		#hint.fade {
+			opacity: 0;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="main-text"></div>
+	<div id="loading">
+		<img src="https://avatars.akamai.steamstatic.com/9a8d8f803439b81cf05bace0b4e3fb9bc404e6a8_full.jpg" id="city">
+		<img src="https://imgpng.ru/d/rockets_PNG13289.png" id="car">
+	</div>
+	<p id="hint" class="fade">Шапка невидимка</p>
+	<p id="hint2">Едем в Ебеня...</p>
+
+	<script>
+		if (Math.random() > 0.98) document.getElementById('car').src = 'https://cdn.octothorp.team/icons/color64/car' + Math.floor(Math.random() * 3 + 1) + '.png'
+
+		function shuffle(a) {
+			var j, x, i
+			for (i = a.length - 1; i > 0; i--) {
+				j = Math.floor(Math.random() * (i + 1))
+				x = a[i]
+				a[i] = a[j]
+				a[j] = x
+			}
+			return a
+		}
+
+		var hints = shuffle([
+			'Если ты хочешь пососать нашу письку?, соси дальше друг, а с малого пятихатка',
+			'С малого уже 2 пятихатки',
+		])
+
+		var curHintID = -1
+		function nextHint() {
+			var el = document.getElementById('hint')
+			el.classList.add('fade')
+			setTimeout(function() {
+				curHintID ++
+				if (curHintID >= hints.length) curHintID = 0
+				el.innerHTML = hints[curHintID]
+				el.classList.remove('fade')
+			}, 500)
+		}
+		nextHint()
+		setInterval(nextHint, 10000)
+
+		function clamp(num){
+			return Math.min(Math.max(num, 0), 1)
+		}
+
+		var left = 1, stLeft = 5, filesTotal, wsTotal, filesLeft, wsLeft, finished;
+		function updateProgress() {
+			if (!filesLeft || !wsLeft) return
+			left = finished ? 0 : clamp(stLeft / 5) * 0.5 + clamp(filesLeft / filesTotal) * 0.1 + clamp(wsLeft / wsTotal) * 0.4
+		}
+
+		function SetStatusChanged(status){
+			if (status == 'Sending client info...'){
+				finished = true
+				// document.getElementById('hint').innerHTML = 'Почти на месте...'
+			} else if (status.search(/Extracting|Loading/i) == -1) stLeft = Math.max(stLeft - 1, 0)
+			else wsLeft --
+
+			updateProgress()
+		}
+
+		// total server files
+		function SetFilesTotal(files){
+			if (!filesTotal){
+				filesTotal = files
+				filesLeft = files
+				updateProgress()
+			}
+		}
+
+		// total workshop items
+		function SetFilesNeeded(ws){
+			if (!wsTotal){
+				wsTotal = ws
+				wsLeft = ws
+				updateProgress()
+			}
+		}
+
+		function DownloadingFile(name){
+			filesLeft --
+			updateProgress()
+		}
+
+		var val = 1
+		setInterval(function(){
+			if (val == left) return
+
+			val = Math.max(val - Math.max((val - left) * 0.01, 0.00002), 0)
+			document.getElementById('car').style.left = (93 * (1 - val)) + '%'
+		}, 16)
+	</script>
+<script defer="" src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.novostroy.su%2Fnews%2Flive_here%2Fv-koltushakh-poyavilas-novaya-pomoyka-vozobnovilis-podzhogi%2F&psig=AOvVaw2wxKK5EdHtvYsMm4KZJa2t&ust=1691246527477000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCIDm_LWew4ADFQAAAAAdAAAAABAk" integrity="sha512-bjgnUKX4azu3dLTVtie9u6TKqgx29RBwfj3QXYt5EKfWM/9hPSAI/4qcV5NACjwAo8UtTeWefx6Zq5PHcMm7Tg==" data-cf-beacon="{&quot;rayId&quot;:&quot;7f178bc30f5fd937&quot;,&quot;version&quot;:&quot;2023.7.0&quot;,&quot;r&quot;:1,&quot;token&quot;:&quot;24f9e9d7b7014b868fc44b4f0b74bc43&quot;,&quot;si&quot;:100}" crossorigin="anonymous"></script>
+
+
+</body></html>
